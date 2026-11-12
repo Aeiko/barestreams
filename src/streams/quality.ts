@@ -1,4 +1,5 @@
-const QUALITY_REGEX = /\b(2160p|1080p|720p|480p|4k|uhd)\b/i;
+const QUALITY_REGEX =
+	/\b(?:(?:2160p|1080p|720p|480p|4k|uhd)[\s.-]+to[\s.-]+)?(2160p|1080p|720p|480p|4k|uhd)\b/i;
 
 export const extractQualityHint = (text: string): string | null => {
 	const match = text.match(QUALITY_REGEX);

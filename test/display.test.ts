@@ -22,6 +22,17 @@ describe("formatStreamDisplay", () => {
 		);
 	});
 
+	it("labels a 4K-to-1080p encode by its output resolution", () => {
+		const display = formatStreamDisplay({
+			imdbTitle: "Reincarnated as a Sword",
+			torrentName: "Tensei Shitara Ken Deshita (SHQ) ABEMA 4K to 1080p HEVC E-OPUS HR-DR",
+			source: "KAT",
+		});
+
+		expect(display.name).toBe("Watch 1080p");
+		expect(display.title).toBe("Watch 1080p");
+	});
+
 	it("defaults missing quality to 480p", () => {
 		const display = formatStreamDisplay({
 			imdbTitle: "Some Movie",
