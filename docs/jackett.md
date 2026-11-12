@@ -14,7 +14,7 @@ The existing Redis cache, request deadline, zero-seeder filter, and tracker appe
 
 ## 1. Deploy the updated Barestreams service first
 
-Keep `JACKETT_URL` and `JACKETT_API_KEY` blank initially. Deploy the standard `docker-compose.yml` from this fork. It creates a dedicated bridge network named `barestreams-indexers` and attaches only the Barestreams app to it, in addition to its existing network with Redis and Byparr.
+Keep `JACKETT_URL` and `JACKETT_API_KEY` blank initially. Deploy the standard `docker-compose.yml` from this fork. It creates a dedicated bridge network named `barestreams-indexers` and attaches Barestreams and Byparr to it. Both retain their existing deployment network; Redis stays on that deployment network only.
 
 This is a same-Docker-host setup. It does not connect services on different servers. Do not mark this network `internal: true`: Jackett needs internet access to search indexers.
 
@@ -39,6 +39,8 @@ ssh -i "C:\path\to\oracle.key" -N -L 9117:127.0.0.1:9117 ubuntu@YOUR_SERVER_IP
 Keep that terminal open, then visit **http://localhost:9117**. If local port 9117 is occupied, use `-L 19117:127.0.0.1:9117` and browse to port 19117 instead.
 
 Set an admin password in Jackett, add a few **public video/anime indexers**, and use Jackett's Test and manual search buttons before enabling the integration. Start with Nyaa.si (`nyaasi`). Add ExtraTorrent.st (`extratorrent-st`) only if it is offered and its test/search succeed in your installation. EXT.to is not guaranteed to be supported. RiveStream is a streaming frontend, not a Jackett torrent indexer.
+
+For indexers that report "Challenge detected but FlareSolverr is not configured", scroll to Jackett Configuration, set **FlareSolverr API URL** to `http://flaresolverr:8191`, and click **Apply server settings**. This reuses the existing Byparr service through the shared network. Redeploy Barestreams after pulling the network configuration before testing this URL; `localhost:8191` inside Jackett would point to Jackett itself. No public port mapping or Oracle ingress rule is needed. Retry the indexer test and inspect Jackett/Byparr logs if it still fails; challenge solving is not guaranteed.
 
 Copy the API key shown in Jackett. Do not paste it into Git, logs, screenshots, or a Stremio URL.
 
