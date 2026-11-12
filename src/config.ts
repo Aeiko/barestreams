@@ -57,7 +57,8 @@ export const loadConfig = (): AppConfig => {
 	const katUrls = katRaw ? parseUrls(katRaw) : [];
 
 	const flareSolverrRaw = process.env.FLARESOLVERR_SESSIONS || "10";
-	const flareSolverrSessions = parsePositiveInt(flareSolverrRaw) ?? 10;
+	const flareSolverrSessions =
+		flareSolverrRaw.trim() === "0" ? 0 : (parsePositiveInt(flareSolverrRaw) ?? 10);
 	const flareSolverrRefreshRaw =
 		process.env.FLARESOLVERR_SESSION_REFRESH_MS || "3600000";
 	const flareSolverrSessionRefreshMs =

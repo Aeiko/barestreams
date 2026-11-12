@@ -8,7 +8,9 @@ Minimal Stremio addon that serves torrent stream results with Redis-backed cachi
 docker compose up --build
 ```
 
-Run with the VPN gateway (`gluetun`):
+The default Compose setup uses [Byparr](https://github.com/ThePhaseless/Byparr) under the `flaresolverr` service name, keeping `FLARESOLVERR_URL=http://flaresolverr:8191` unchanged. It sets `FLARESOLVERR_SESSIONS=0` because Byparr supports requests but not FlareSolverr session management. Browser fallback remains enabled; this does not limit concurrent requests.
+
+Run with the VPN gateway (`gluetun`), which still uses FlareSolverr:
 
 ```bash
 docker compose -f docker-compose.gluetun.yml up --build
@@ -24,7 +26,7 @@ The Docker setup includes optional containers that you can remove if you don't n
 
 - `gluetun`: VPN gateway ([qdm12/gluetun](https://github.com/qdm12/gluetun)). Current config is NordVPN-specific; Gluetun supports other providers as well and requires `.env` values if enabled.
 - `redis`: Caching backend. If disabled, remove `REDIS_*` configurations.
-- `flaresolverr`: Used by some scrapers to bypass cloudflare protections ([FlareSolverr/FlareSolverr](https://github.com/FlareSolverr/FlareSolverr)). If disabled, remove `FLARESOLVERR_*` configurations.
+- `flaresolverr`: Browser-based scraper fallback, using Byparr in the default setup and [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) in the VPN and e2e setups. If disabled, remove `FLARESOLVERR_*` configurations.
 
 ## Run e2e tests with FlareSolverr
 
@@ -44,7 +46,7 @@ docker compose -f docker-compose.test.yml up --abort-on-container-exit --build
 - `X1337X_URL`: Comma-separated list of 1337x base URLs to try in order.
 - `KAT_URL`: Comma-separated list of Kickass base URLs to try in order.
 - `FLARESOLVERR_URL`: FlareSolverr base URL (optional).
-- `FLARESOLVERR_SESSIONS`: Maximum FlareSolverr sessions per scraper (optional).
+- `FLARESOLVERR_SESSIONS`: Maximum FlareSolverr sessions per scraper (defaults to 10). Set to `0` to disable session pooling while keeping browser fallback enabled, as required by Byparr.
 - `FLARESOLVERR_SESSION_REFRESH_MS`: FlareSolverr session refresh interval in ms (optional).
 - `USE_TRACKERSLIST`: Append the built-in trackerslist tracker set to torrent responses. Defaults to `true`.
 - `CUSTOM_TRACKERS`: Additional trackers to append to torrent responses. Accepts either a comma-separated list of tracker URLs or a path to a local file containing one tracker URL per line.

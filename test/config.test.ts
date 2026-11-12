@@ -7,6 +7,24 @@ afterEach(() => {
 });
 
 describe("loadConfig", () => {
+	it.each([
+		[undefined, 10],
+		["0", 0],
+		["1", 1],
+		["10", 10],
+		["-1", 10],
+		["invalid", 10],
+	])("parses FLARESOLVERR_SESSIONS=%s as %i", async (raw, expected) => {
+		if (raw === undefined) {
+			delete process.env.FLARESOLVERR_SESSIONS;
+		} else {
+			process.env.FLARESOLVERR_SESSIONS = raw;
+		}
+		const { loadConfig } = await import("../src/config.js");
+
+		expect(loadConfig().flareSolverrSessions).toBe(expected);
+	});
+
 	it("defaults tracker appending to enabled with no custom source", async () => {
 		delete process.env.USE_TRACKERSLIST;
 		delete process.env.CUSTOM_TRACKERS;

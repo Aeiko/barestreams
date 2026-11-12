@@ -3,9 +3,11 @@ services:
     image: redis:7-alpine
 
   flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:latest
-    environment:
-      - LOG_LEVEL=info
+    image: ghcr.io/thephaseless/byparr:latest
+    restart: unless-stopped
+    shm_size: "1gb"
+    tmpfs:
+      - /tmp:exec,mode=1777,size=1G
 
   barestreams:
     build: .
@@ -27,7 +29,8 @@ services:
       - APIBAY_URL=https://apibay.org
       - X1337X_URL=https://1337x.to
       - KAT_URL=https://katcr.to,https://kickasstorrents.to
-      - FLARESOLVERR_SESSIONS=10
+      # Byparr supports request.get but not FlareSolverr session commands.
+      - FLARESOLVERR_SESSIONS=0
       - FLARESOLVERR_URL=http://flaresolverr:8191
     volumes:
       - ./data/imdb:/app/data/imdb
