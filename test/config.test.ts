@@ -25,6 +25,50 @@ describe("loadConfig", () => {
 		expect(loadConfig().flareSolverrSessions).toBe(expected);
 	});
 
+	it("leaves Jackett disabled when unconfigured", async () => {
+		delete process.env.JACKETT_URL;
+		delete process.env.JACKETT_API_KEY;
+		delete process.env.JACKETT_INDEXERS;
+		const { loadConfig } = await import("../src/config.js");
+
+		expect(loadConfig()).toMatchObject({
+			jackettUrl: null,
+			jackettApiKey: null,
+			jackettIndexers: [],
+		});
+	});
+
+	it("loads the Jackett connection and selected indexers", async () => {
+		process.env.JACKETT_URL = " http://jackett:9117/ ";
+		process.env.JACKETT_API_KEY = " example-key ";
+		process.env.JACKETT_INDEXERS = "nyaasi, extratorrent-st";
+		const { loadConfig } = await import("../src/config.js");
+
+		expect(loadConfig()).toMatchObject({
+			jackettUrl: "http://jackett:9117",
+			jackettApiKey: "example-key",
+			jackettIndexers: ["nyaasi", "extratorrent-st"],
+		});
+	});
+
+	it.each(["ftp://jackett", "http://user:password@jackett", "not-a-url", "http://jackett?apikey=secret"])(
+		"rejects invalid Jackett URL %s without exposing its value", async (url) => {
+			process.env.JACKETT_URL = url;
+			process.env.JACKETT_API_KEY = "example-key";
+			const { loadConfig } = await import("../src/config.js");
+
+			expect(() => loadConfig()).toThrow("JACKETT_URL must be an HTTP(S) base URL without credentials, query or fragment");
+		},
+	);
+
+	it("rejects an incomplete Jackett connection", async () => {
+		process.env.JACKETT_URL = "http://jackett:9117";
+		delete process.env.JACKETT_API_KEY;
+		const { loadConfig } = await import("../src/config.js");
+
+		expect(() => loadConfig()).toThrow("Set both JACKETT_URL and JACKETT_API_KEY");
+	});
+
 	it("defaults tracker appending to enabled with no custom source", async () => {
 		delete process.env.USE_TRACKERSLIST;
 		delete process.env.CUSTOM_TRACKERS;

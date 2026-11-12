@@ -22,10 +22,12 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379
       - REDIS_TTL_HOURS=168
-      - MAX_REQUEST_WAIT_SECONDS=15
-      - EZTV_URL=https://eztv.re
-      - YTS_URL=https://yts.lt
-      - TGX_URL=https://torrentgalaxy.hair
+      - MAX_REQUEST_WAIT_SECONDS=${MAX_REQUEST_WAIT_SECONDS:-15}
+      - JACKETT_URL=${JACKETT_URL:-}
+      - JACKETT_API_KEY=${JACKETT_API_KEY:-}
+      - JACKETT_INDEXERS=${JACKETT_INDEXERS:-}
+      - EZTV_URL=https://eztvx.to
+      - YTS_URL=https://yts.gg
       - APIBAY_URL=https://apibay.org
       - X1337X_URL=https://1337x.to
       - KAT_URL=https://katcr.to,https://kickasstorrents.to
@@ -34,3 +36,10 @@ services:
       - FLARESOLVERR_URL=http://flaresolverr:8191
     volumes:
       - ./data/imdb:/app/data/imdb
+    networks:
+      - default
+      - indexers
+
+networks:
+  indexers:
+    name: barestreams-indexers

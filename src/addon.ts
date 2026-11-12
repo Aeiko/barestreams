@@ -8,6 +8,7 @@ import { parseStremioId, type ParsedStremioId } from "./parsing/stremioId.js";
 import type { ScrapeContext } from "./scrapers/context.js";
 import { scrapeEztvStreams } from "./scrapers/eztv.js";
 import { scrapeKickassStreams } from "./scrapers/kickass.js";
+import { scrapeJackettStreams } from "./scrapers/jackett.js";
 import { scrapePirateBayStreams } from "./scrapers/pirateBay.js";
 import { scrapeTorrentGalaxyStreams } from "./scrapers/torrentGalaxy.js";
 import { scrapeX1337xStreams } from "./scrapers/x1337x.js";
@@ -220,6 +221,7 @@ export const createAddonInterface = () => {
 			responses = await Promise.allSettled(
 				type === "movie"
 						? [
+							scrapeJackettStreams(parsed, "movie", scrapeContext),
 							scrapeYtsStreams(parsed, scrapeContext),
 							scrapeTorrentGalaxyStreams(parsed, scrapeContext),
 							scrapePirateBayStreams(parsed, "movie", scrapeContext),
@@ -227,6 +229,7 @@ export const createAddonInterface = () => {
 							scrapeX1337xStreams(parsed, scrapeContext),
 						]
 					: [
+							scrapeJackettStreams(parsed, "series", scrapeContext),
 							scrapeEztvStreams(parsed, scrapeContext),
 							scrapeTorrentGalaxyStreams(parsed, scrapeContext),
 							scrapePirateBayStreams(parsed, "series", scrapeContext),
@@ -244,6 +247,7 @@ export const createAddonInterface = () => {
 				return [];
 			}
 			return result.value.streams.filter((stream) => {
+				if (isZeroSeederMagnet(stream)) return false;
 				const key = stream.infoHash ?? stream.url ?? "";
 				if (!key) {
 					return false;
@@ -265,11 +269,7 @@ export const createAddonInterface = () => {
 				return true;
 			});
 		});
-		const filteredStreams = streams.filter(
-			(stream) => !isZeroSeederMagnet(stream),
-		);
-
-		const sortedStreams = filteredStreams.slice().sort(sortBySeedersDesc);
+		const sortedStreams = streams.slice().sort(sortBySeedersDesc);
 		const response: StreamResponse = {
 			streams: sortedStreams.map((stream) =>
 				stripStreamExtras(

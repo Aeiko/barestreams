@@ -1,6 +1,9 @@
 export type AppConfig = {
 	redisUrl: string | null;
 	redisTtlHours: number | null;
+	jackettUrl: string | null;
+	jackettApiKey: string | null;
+	jackettIndexers: string[];
 	eztvUrls: string[];
 	ytsUrls: string[];
 	tgxUrls: string[];
@@ -38,6 +41,28 @@ const parseBoolean = (raw: string): boolean | null => {
 };
 
 export const loadConfig = (): AppConfig => {
+	const jackettUrl = process.env.JACKETT_URL?.trim().replace(/\/+$/, "") || null;
+	const jackettApiKey = process.env.JACKETT_API_KEY?.trim() || null;
+	const jackettIndexers = parseUrls(process.env.JACKETT_INDEXERS ?? "");
+	if (Boolean(jackettUrl) !== Boolean(jackettApiKey)) {
+		throw new Error("Set both JACKETT_URL and JACKETT_API_KEY");
+	}
+	if (jackettUrl) {
+		try {
+			const url = new URL(jackettUrl);
+			if (
+				!["http:", "https:"].includes(url.protocol) ||
+				url.username || url.password || url.search || url.hash
+			) {
+				throw new Error();
+			}
+		} catch {
+			throw new Error(
+				"JACKETT_URL must be an HTTP(S) base URL without credentials, query or fragment",
+			);
+		}
+	}
+
 	const eztvRaw = process.env.EZTV_URL || "";
 	const eztvUrls = parseUrls(eztvRaw);
 
@@ -86,6 +111,9 @@ export const loadConfig = (): AppConfig => {
 	return {
 		redisUrl,
 		redisTtlHours,
+		jackettUrl,
+		jackettApiKey,
+		jackettIndexers,
 		eztvUrls,
 		ytsUrls,
 		tgxUrls,

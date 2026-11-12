@@ -1,0 +1,22 @@
+services:
+  jackett:
+    image: lscr.io/linuxserver/jackett:latest
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Etc/UTC}
+    volumes:
+      - jackett-config:/config
+    ports:
+      - "127.0.0.1:9117:9117"
+    networks:
+      - indexers
+
+volumes:
+  jackett-config:
+
+networks:
+  indexers:
+    external: true
+    name: barestreams-indexers

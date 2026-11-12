@@ -180,7 +180,8 @@ export const scrapeX1337xStreams = async (
 	context: ScrapeContext,
 ): Promise<StreamResponse> => {
 	const baseUrls = config.x1337xUrls;
-	const detailLimit = config.flareSolverrSessions;
+	// Disabling browser session pooling must not disable torrent results.
+	const detailLimit = config.flareSolverrSessions || 10;
 	if (baseUrls.length === 0 || detailLimit <= 0 || shouldAbort(context)) {
 		return { streams: [] };
 	}

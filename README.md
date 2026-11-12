@@ -28,6 +28,10 @@ The Docker setup includes optional containers that you can remove if you don't n
 - `redis`: Caching backend. If disabled, remove `REDIS_*` configurations.
 - `flaresolverr`: Browser-based scraper fallback, using Byparr in the default setup and [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) in the VPN and e2e setups. If disabled, remove `FLARESOLVERR_*` configurations.
 
+## Optional Jackett integration
+
+Barestreams can also query a separate Jackett service for public indexers. Existing scrapers remain enabled and results are deduplicated by info hash. See [Jackett setup on Dokploy](docs/jackett.md) for private networking, deployment, and limitations.
+
 ## Run e2e tests with FlareSolverr
 
 ```bash
@@ -38,6 +42,9 @@ docker compose -f docker-compose.test.yml up --abort-on-container-exit --build
 
 - `REDIS_URL`: Redis connection URL (optional).
 - `REDIS_TTL_HOURS`: Redis cache TTL in hours (optional).
+- `JACKETT_URL`: Jackett HTTP(S) base URL, e.g. `http://jackett:9117`. Set together with `JACKETT_API_KEY`; leave both blank to disable.
+- `JACKETT_API_KEY`: Server-side Jackett API key. Never commit it or share it with Stremio clients.
+- `JACKETT_INDEXERS`: Optional comma-separated Jackett indexer IDs (e.g. `nyaasi,extratorrent-st`); blank searches all configured indexers.
 - `MAX_REQUEST_WAIT_SECONDS`: Maximum time in seconds to wait for scraper results before returning partial results (optional).
 - `EZTV_URL`: Comma-separated list of EZTV base URLs to try in order.
 - `YTS_URL`: Comma-separated list of YTS base URLs to try in order.
